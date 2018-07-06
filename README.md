@@ -9,4 +9,5 @@ This script will simulate SNP marker data with 5 different possible confounding 
 * family structure
 * measurement error
 * model complexity
+
 This script can create 4 simulated data sets with different combinations of the above factors.
