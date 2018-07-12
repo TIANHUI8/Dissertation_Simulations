@@ -1,0 +1,69 @@
+setwd("D:/Clemson/RESEARCH/RESEARCH/birddata/")
+getwd()
+Phenotype=read.table(file="Phenotype.txt",header=T,stringsAsFactors=FALSE);
+Markers=read.csv(file="Finches_numeric_impute_1.csv",header=T);
+M=Markers[,-2];
+X=t(M[,-1]);
+XX = data.frame(rownames(X),X)
+names(XX)[1]='SampleID'
+mergedata = merge(XX,Phenotype,by='SampleID',all=TRUE,sort=FALSE)
+Y=mergedata$Beakdepth;
+#########single marker regression##############
+p=ncol(X);
+pValues=numeric();
+for(i in 1:p){
+    fm=lm(Y~X[,i])
+    pValues[i]=summary(fm)$coef[2,4]
+    print(paste('Fitting Marker ', i , '.' ,sep=''))
+}
+##plot(-log(pValues,base=10),cex=.5,col=2)
+rank=order(pValues);
+result1=Markers[rank,1]
+####LASSO#####
+library(glmnet)
+set.seed(12356)
+fit1=cv.glmnet(X,Y,alpha=1)
+fit2=glmnet(X,Y,alpha=1,lambda=fit1$lambda.1se)
+betahat = coef(fit2)[-1]
+id = order(abs(betahat),decreasing=TRUE)
+result2=Markers[id,1]
+#####Elatic Net###################
+fit.en1 = cv.glmnet(X, Y, alpha = 0.5)
+fit.en2 = glmnet(X, Y, alpha = 0.5, lambda = fit.en1$lambda.1se)
+betahat2=coef(fit.en2)[-1]
+id2 = order(abs(betahat2),decreasing=TRUE)
+result3=Markers[id2,1]
+####Ridge Regression###
+fit.RR1 = cv.glmnet(X, Y, alpha = 0)
+fit.RR2 = glmnet(X, Y, alpha = 0,lambda = fit.RR1$lambda.1se)
+betahat3=coef(fit.RR2)[-1]
+id3 = order(abs(betahat3),decreasing=TRUE)
+result4=Markers[id3,1]
+########Bayesian Alphabet#####
+N=12000;n=2000
+library(BGLR)
+set.seed(1234)
+ETA1=list(X=list(X=X,model="BRR"))
+fmBRR=BGLR(y=Y,ETA=ETA1,nIter=N,burnIn=n)
+a=fmBRR$ETA$X$b
+idxa = order(abs(a),decreasing=TRUE)
+result5=Markers[idxa,1]
+###BayesA(Scaled-t prior)###
+ETA2=list(X=list(X=X,model="BayesA"))
+fmBA=BGLR(y=Y,ETA=ETA2,nIter=N,burnIn=n)
+b=fmBA$ETA$X$b
+idxb = order(abs(b),decreasing=TRUE)
+result6=Markers[idxb,1]
+########save results#####
+write.csv(cbind(result1,result4,result2,result3,result5,result6),file="result.csv")
+result=read.csv(file="result.csv",header=T)[,-1];
+which(result[,1]==12259347)
+index_simple=c(1:10)
+index_RR=c(1648,67,820,474,1126,900,603,943,736,138)
+index_lasso=c(12,33,1795,4,1,13,603,27,900,143)
+index_en=c(13,12,4,33,1795,1,27,11,603,226)
+index_BR=c(7,13,23,48,3,16,12,4,27,10)
+index_BA=c(12,16,2,7,15,10,5,13,33,6)
+index_GEMMA=c(1,13,4224,274,11,640,2,27,33,99)
+data=cbind(index_simple,index_RR,index_lasso,index_en,index_BR,index_BA,index_GEMMA)
+pairs(data,lower.panel=NULL,labels=c("Simple Linear","Ridge Regression","LASSO","Elastic Net","BayesaRidge","BayesA","GEMMA"),cex.labels=1)
