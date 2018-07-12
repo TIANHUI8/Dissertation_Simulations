@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -N indtest
+#PBS -j eo
+#PBS -l select=1:ncpus=1:mem=5gb,walltime=00:99:99
+cd $PBS_O_WORKDIR
+
+#Name of script to run
+Rscript merge.R

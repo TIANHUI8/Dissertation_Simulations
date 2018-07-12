@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -N indtest
+#PBS -j eo
+#PBS -l select=1:ncpus=16:mem=63gb,walltime=48:00:00
+cd $PBS_O_WORKDIR
+
+#Name of script to run
+Rscript Sim_a.R
