@@ -45,4 +45,5 @@ This script also plots the emperical frequencies for different intervals.
 
 ### appendix_1a.R
 This script genrate p binomial variables and calculate the emperical frequencies of the covariance frequencies as the correlation coefficient changes; It will plot the emperical freqencies as r changes.
-
+### cutoff_forall.R
+This script will calculate the cutoffs for single marker regression and BayesA
