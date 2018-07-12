@@ -3,6 +3,7 @@ A set of R scripts used to simulate GWAS data in order to test variable selectio
 
 ## Contents
 ###bird analysis.txt######
+
 This is the R code for variable selection analysis for bird data in a txt file with 6 methods:
 * single marker regression
 * lasso
